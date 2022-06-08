@@ -1,0 +1,180 @@
+:- use_module(students_courses).
+%===================Task1=================================
+%Function return IDS and Grade of Student in specific Courses
+studentsInCourse(X,S):-
+     studentsInCourse(X,[],S).
+studentsInCourse(X,NS,S):-
+    student(I,X,Z),
+    \+memb([I,Z],NS),!,
+    app([[I,Z]],NS,N),
+    studentsInCourse(X,N,S).
+studentsInCourse(_,S,S).
+%-----------------------------------------
+%---Function to add items in the list---
+app([X],S,[Head|Tail]):-
+     [Head|Tail]=[X|S].
+%-------Function chech that the itemin list or not!---
+memb(X,[X|_]).
+memb(X,[_|Y]):-
+    memb(X,Y).
+%------------------------------
+%===================Task2=================================
+%----Function return number of cources to student
+numStudents(X,Num):-
+     studentsInCourse(X,S),
+     len(S,Num).
+%-------Function return the lenght of the String-------------
+len([],0).
+len([_|Tail],Num):-
+     len(Tail,Result),
+     Num is Result+1.
+%----------------------------------------
+%===================Task3=================================
+%---Function to get maximum Number---
+max1(P,O,W):-
+     P>=O,
+     W=P,!.
+max1(_,O,W):-
+     W=O.
+max([Head],Head).
+max([Head|Tail],X):-
+     max(Tail,L),
+     max1(Head,L,X).
+%-----------------------------------
+%--Function return list of grades of specific student----
+returnGrades(X,S):-
+     returnGrades(X,[],S).
+returnGrades(X,NS,S):-
+     student(X,_,Y),
+     \+memb(Y,NS),!,
+     app([Y],NS,N),
+     returnGrades(X,N,S).
+returnGrades(_,S,S).
+%--------------------------------------------
+%----Function return maximum grade of student----
+maxStudentGrade(ID,Maxgrade):-
+     returnGrades(ID,S),
+     max(S,Maxgrade).
+%-----------------------------------------
+%===================Task4=================================
+%----Facts about digits to Numbers--------------
+digitW(0,zero).
+digitW(1,one).
+digitW(2,two).
+digitW(3,three).
+digitW(4,four).
+digitW(5,five).
+digitW(6,six).
+digitW(7,seven).
+digitW(8,eight).
+digitW(9,nine).
+
+%-------------------------------------------
+%---Function return onlu one digit in word-------
+convertDigit1(N,[D]):-
+          digitW(N,D).
+%----------------------------------------------
+%----Function that return two digts in words in List---
+convertDigit(N,[D,W]):-
+     Head is N mod 10,
+     G is N-Head,
+     Tail is G/10,
+     digitW(Head,W),
+     digitW(Tail,D).
+%---------------------------------------
+%Function return digits in Words----
+gradeInWords(SID,Subject, DigitsWords):-
+     student(SID,Subject,Grade),!,
+     M is Grade mod 10,
+     J is Grade-M,
+     ( J==0 ->
+         convertDigit1(M,DigitsWords)
+       ;
+     convertDigit(Grade,DigitsWords)
+          ).
+%----------------------------------------------------
+%===================Task5=================================
+%---------Function that return related Cources---------------
+inCourse(Course,List):-
+     inCourse(Course,[],List).
+inCourse(Course,NewList,List):-
+    prerequisite(X,Course),
+    \+memb([X],NewList),!,
+    app([X],NewList,N),
+    inCourse(X,N,List).
+inCourse(_,S,S).
+%---------------------------------------------------
+% ------Function that make difference between two---
+makediffrence([],_,[]).
+makediffrence([Head|Tail],S,[Head|D]):-
+     \+memb(Head,S),!,
+     makediffrence(Tail,S,D).
+makediffrence([_|L],S,D):-
+     makediffrence(L,S,D).
+diff(List1,List2,Res):-
+     makediffrence(List1,List2,Res1),
+     makediffrence(List2,List1,Res2),
+     appd(Res1,Res2,Res).
+%----------------------------------------------------
+%----Function that make intersect between two lists---
+intersect([X|Y],M,[X|Z]):-
+     memb(X,M),
+     intersect(Y,M,Z).
+intersect([X|Y],M,Z):-
+     \+memb(X,M),
+     intersect(Y,M,Z).
+intersect([],_,[]).
+%--------------------------------
+%-----Function that append in list------
+appd([],VAL,VAL).
+appd([Head|Tail],X,[Head|S]) :- appd(Tail,X,S).
+%---------------------------------------------
+/* ----Function return the remmaining cources for student to take specific course*/
+remainingCourses(StudentID,Subject,Cources):-
+     getStudentTaken(StudentID,X),
+     inCourse(Subject,Y),
+     intersect(X,Y,Z),
+     len(Z,Num),
+     Num =\=0,
+     diff(Z,Y,Cources).
+%----------------------------------------------------------------
+
+%-----------Function to return Student Subjects----------------
+getStudentTaken(X,S):-
+     getStudentTaken(X,[],S).
+getStudentTaken(X,NS,S):-
+    student(X,I,D),
+    \+memb(I,NS),!,
+    D>=50,
+    app([I],NS,N),
+    getStudentTaken(X,N,S).
+getStudentTaken(_,S,S).
+
+
+%---------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
